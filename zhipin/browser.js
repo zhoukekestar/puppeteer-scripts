@@ -1,5 +1,5 @@
 (() => {
-  if (location.href !== 'https://www.zhipin.com/chat/im/?mu=recommend') return;
+  if (location.href.indexOf('https://www.zhipin.com/chat/im') == -1) return;
 
   const scroll = () => {
     var container = document.querySelector('div#container');
@@ -78,12 +78,15 @@
     )
   }
 
-  const waitForElement = ele => (new Promise((resolve, reject) => {
+  const waitForElement = elestr => (new Promise((resolve, reject) => {
+      console.log('wait for element');
     let interval = setInterval(() => {
-      ele = document.querySelector(ele);
+      console.log('check element');
+      var ele = document.querySelector(elestr);
       if (!ele) return;
 
       if (elementInViewport(ele)) {
+          console.log('element is in viewport');
         clearInterval(interval);
         resolve();
       }
@@ -92,14 +95,29 @@
 
   const checkResume = () => (new Promise(resolve => {
     console.log('check resume')
-    var text = document.querySelector('.dialog-wrap.dialog-layer-full.dialog-resume-full');
-    text = text.textContent;
-    if (/360|腾讯|百度|京东|网易|奇虎|阿里巴巴|天猫|淘宝/.test(text)) {
+    // var text = document.querySelector('.dialog-wrap.dialog-layer-full.dialog-resume-full');
+    // text = text.textContent;
+
+
+    var money = document.querySelector('.dialog-wrap.dialog-layer-full.dialog-resume-full').textContent.match(/(\d*)k-(\d*)k/);
+    if (money) {
+        if (Math.max(+money[1], +money[2]) < 21) {
+            console.log(`money: ${money[1]} ${money[2]} not matched skip`);
+            resolve();
+            return;
+        }
+    }
+
+    // company name
+    var text = Array.from(document.querySelectorAll('.dialog-wrap.dialog-layer-full.dialog-resume-full h4')).map(item => item.textContent).join(',')
+    if (/360|腾讯|百度|京东|网易|奇虎|阿里|淘宝|天猫|QQ|搜狐|搜狗|有道|携程|唯品|苏宁|美团|大众点评|小米|新浪|微博|乐视|华为/.test(text)) {
       notify('找到优质简历');
+      console.log('good resume, waiting for human check...');
       resumeConfirm().then(() => {
         resolve();
       })
     } else {
+      console.log('company name not matched. skip')
       resolve();
     }
   }));
