@@ -1,4 +1,6 @@
-(() => {
+const browser = () => {
+  alert('begin');
+  console.log('browser script start...');
   if (location.href.indexOf('https://www.zhipin.com/chat/im') == -1) return;
 
   const scroll = () => {
@@ -184,5 +186,7 @@
 
     setTimeout(start, 5000);
   }
-})();
+};
+
+module.exports = browser;
 //@ sourceURL=zhipin.js
